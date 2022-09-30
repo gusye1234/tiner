@@ -21,7 +21,7 @@ from tiner import tiner
 from time import sleep
 
 with tiner("see this block"):
-	sleep(1)
+  sleep(1)
 # return the block running time
 print(tiner.get('see this block'))
 ```
