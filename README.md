@@ -27,7 +27,7 @@ with tiner("see this block"):
 print(tiner.get('see this block'))
 ```
 
-### Design for loops, or pipeline
+### Design for loops
 
 ```python
 from tiner import tiner
@@ -77,4 +77,8 @@ A timer should be clear and simple
 tiner.get(BLOCK_NAME) # return a certain block running time so far
 tiner.table([BLOCK1, ...]) # print some blocks' time on a formatted table
 tiner.zero([BLOCK1, ...]) # empty some blocks' time
+tiner.disable() # disable time logging
 ```
+
+---
+> **NOTE**: `tiner`'s timing is relatively precise. You should only use it for comparison of the timings of different blocks in one run, not for different runs of your program.
