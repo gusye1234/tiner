@@ -21,7 +21,6 @@ class tiner:
         data = [['Block', 'Time(s)']]
         if blocks is None:
             for key, value in tiner.__NAMED_BLOCK.items():
-                hint = hint + f"{key}:{value:.2f}|"
                 data.append((key, value))
         else:
             for key in blocks:

@@ -3,8 +3,6 @@ import tiner
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
-with open('requirements.txt', 'r') as fh:
-    deps = [l.strip() for l in fh]
 
 
 setuptools.setup(
@@ -22,5 +20,5 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    install_requires=deps,
+    install_requires=['tabulate']
 )

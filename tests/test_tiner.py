@@ -20,3 +20,17 @@ def test_time_mining():
             d = perf_counter() - s
         sum_d += d
     assert (tiner.get("test:loop") - sum_d) < 1e-3
+
+
+def test_zero():
+    duration = 0.1
+
+    with tiner("t1"):
+        sleep(duration)
+    with tiner("t2"):
+        sleep(duration)
+
+    tiner.zero(blocks=['t1'])
+    assert tiner.get("t1") == 0.
+    tiner.zero()
+    assert tiner.get("t2") == 0.
