@@ -2,7 +2,7 @@
   <h1>tiner</h1>
   <p><strong>Block-wise timer for Python</strong></p>
     <p>
-    <img src="  https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
+    <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
   </p>
 </div>
 
