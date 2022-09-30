@@ -15,6 +15,7 @@ class tiner:
     get_time = perf_counter
     fmt_table = partial(tabulate, headers='firstrow', tablefmt='fancy_grid')
     __NAMED_BLOCK = defaultdict(float)  # global time record
+    __enable = True
 
     @staticmethod
     def table(blocks: List = None):
@@ -41,13 +42,20 @@ class tiner:
     def get(name: str):
         return tiner.__NAMED_BLOCK[name]
 
+    @staticmethod
+    def disable(name: str):
+        tiner.__enable = False
+
     def __init__(self, name: str, **kwargs):
-        self.named = name
+        if tiner.__enable:
+            self.named = name
 
     def __enter__(self):
-        self.start = tiner.get_time()
-        return self
+        if tiner.__enable:
+            self.start = tiner.get_time()
+            return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        duration = tiner.get_time() - self.start
-        tiner.__NAMED_BLOCK[self.named] += duration
+        if tiner.__enable:
+            duration = tiner.get_time() - self.start
+            tiner.__NAMED_BLOCK[self.named] += duration
