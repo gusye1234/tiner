@@ -43,7 +43,7 @@ class tiner:
         return tiner.__NAMED_BLOCK[name]
 
     @staticmethod
-    def disable(name: str):
+    def disable():
         tiner.__enable = False
 
     def __init__(self, name: str, **kwargs):
