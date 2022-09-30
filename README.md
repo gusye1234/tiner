@@ -42,6 +42,32 @@ for _ in range(10):
 print(tiner.get('see this loop'))
 ```
 
+### Globally mining
+
+the timing is managed by `tiner`, not its instances
+
+```python
+# A.py
+with tiner("In A"):
+  #do something
+...
+# B.py
+with tiner("In B"):
+  #do something
+
+tiner.table()
+```
+
+```
+╒═════════╤═══════════╕
+│ Block   │   Time(s) │
+╞═════════╪═══════════╡
+│ In B    │  ...      │
+├─────────┼───────────┤
+│ In A    │  ...      │
+╘═════════╧═══════════╛
+```
+
 ### Easy to use
 
 A timer should be clear and simple
