@@ -3,6 +3,7 @@
   <p><strong>Block-wise timer for Python</strong></p>
     <p>
     <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
+    <img src="https://img.shields.io/codecov/c/github/gusye1234/tiner">
   </p>
 </div>
 
@@ -77,4 +78,3 @@ tiner.get(BLOCK_NAME) # return a certain block running time so far
 tiner.table([BLOCK1, ...]) # print some blocks' time on a formatted table
 tiner.zero([BLOCK1, ...]) # empty some blocks' time
 ```
-

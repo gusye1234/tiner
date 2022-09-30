@@ -42,7 +42,6 @@ jobs:
         with:
           files: "./coverage.xml"
       - name: Upload coverage from test to Codecov
-        if: steps.check_files.outputs.files_exists == 'true' && ${{ matrix.os }} == 'ubuntu-latest'
         uses: codecov/codecov-action@v2
         with:
           file: ./coverage.xml
