@@ -46,3 +46,16 @@ def test_disable():
         sleep(duration)
 
     assert tiner.get("t2") == 0
+
+
+def test_table():
+    duration = 0.1
+
+    with tiner("t1"):
+        sleep(duration)
+    tiner.disable()
+    with tiner("t2"):
+        sleep(duration)
+
+    tiner.table()
+    tiner.table(blocks=["t2"])
