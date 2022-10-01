@@ -43,7 +43,7 @@ for _ in range(10):
 print(tiner.get('see this loop'))
 ```
 
-### Globally mining
+### Global mining
 
 the timing is managed by `tiner`, not its instances
 
