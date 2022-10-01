@@ -1,6 +1,10 @@
 from collections import defaultdict
+from stat import filemode
 from typing import List
+import inspect
 from functools import partial
+from unicodedata import name
+from .utils import getline, sanity_check
 
 
 class tiner:
@@ -14,40 +18,55 @@ class tiner:
 
     get_time = perf_counter
     fmt_table = partial(tabulate, headers='firstrow', tablefmt='fancy_grid')
-    __NAMED_BLOCK = defaultdict(float)  # global time record
+    __NAMED_INFO = defaultdict(dict)  # global info record
     __enable = True
 
     @staticmethod
-    def table(blocks: List = None):
-        data = [['Block', 'Time(s)']]
+    def table(blocks: List = None, verbose=False):
         if blocks is None:
-            for key, value in tiner.__NAMED_BLOCK.items():
-                data.append((key, value))
+            blocks = list(tiner.__NAMED_INFO.keys())
+        if not verbose:
+            data = [['Block', 'Time(s)']]
+            for key in blocks:
+                data.append((key, tiner.get(key)))
+            print(tiner.fmt_table(data))
         else:
             for key in blocks:
-                value = tiner.__NAMED_BLOCK[key]
-                data.append((key, value))
-        print(tiner.fmt_table(data))
+                sanity_check(key, tiner.__NAMED_INFO)
+                print(key)
+                cols = [['File', 'Line', 'Time(s)']]
+                for pack, t in tiner.__NAMED_INFO[key].items():
+                    cols.append((pack[0], pack[1], t))
+                print(tiner.fmt_table(cols))
 
     @staticmethod
     def zero(blocks: List = None):
         if blocks is None:
-            for key in tiner.__NAMED_BLOCK.keys():
-                tiner.__NAMED_BLOCK[key] = 0
-        else:
-            for key in blocks:
-                tiner.__NAMED_BLOCK[key] = 0
+            blocks = list(tiner.__NAMED_INFO.keys())
+        for key in blocks:
+            sanity_check(key, tiner.__NAMED_INFO)
+            del tiner.__NAMED_INFO[key]
 
     @staticmethod
     def get(name: str):
-        return tiner.__NAMED_BLOCK[name]
+        sanity_check(name, tiner.__NAMED_INFO)
+        return sum(tiner.__NAMED_INFO[name].values())
 
     @staticmethod
     def disable():
         tiner.__enable = False
 
+    @staticmethod
+    def enable():
+        tiner.__enable = True
+
     def __init__(self, name: str, **kwargs):
         if tiner.__enable:
+            frame = inspect.currentframe().f_back
+            filename, lineno = getline(frame)
+            if (filename, lineno) not in tiner.__NAMED_INFO[name]:
+                tiner.__NAMED_INFO[name][(filename, lineno)] = 0
+            self.pack = (filename, lineno)
             self.named = name
 
     def __enter__(self):
@@ -58,4 +77,4 @@ class tiner:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if tiner.__enable:
             duration = tiner.get_time() - self.start
-            tiner.__NAMED_BLOCK[self.named] += duration
+            tiner.__NAMED_INFO[self.named][self.pack] += duration

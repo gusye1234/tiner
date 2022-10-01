@@ -1,7 +1,19 @@
+import pytest
 from tiner import tiner
+from functools import wraps
 from time import sleep, perf_counter
 
 
+def tiner_reset(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        tiner.zero()
+        tiner.enable()
+        func(*args, **kwargs)
+    return inner
+
+
+@tiner_reset
 def test_time_mining():
     duration = 0.1
     loop_times = 5
@@ -22,6 +34,7 @@ def test_time_mining():
     assert (tiner.get("test:loop") - sum_d) < 1e-3
 
 
+@tiner_reset
 def test_zero():
     duration = 0.1
 
@@ -31,11 +44,15 @@ def test_zero():
         sleep(duration)
 
     tiner.zero(blocks=['t1'])
-    assert tiner.get("t1") == 0.
+    with pytest.raises(KeyError):
+        tiner.get("t1")
+    tiner.get("t2")
     tiner.zero()
-    assert tiner.get("t2") == 0.
+    with pytest.raises(KeyError):
+        tiner.get("t2")
 
 
+@tiner_reset
 def test_disable():
     duration = 0.1
 
@@ -45,17 +62,21 @@ def test_disable():
     with tiner("t2"):
         sleep(duration)
 
-    assert tiner.get("t2") == 0
+    tiner.get('t1')
+    with pytest.raises(KeyError):
+        tiner.get("t2")
 
 
+@tiner_reset
 def test_table():
     duration = 0.1
-
     with tiner("t1"):
         sleep(duration)
-    tiner.disable()
     with tiner("t2"):
         sleep(duration)
 
+    with tiner("t1"):
+        sleep(duration)
+
     tiner.table()
-    tiner.table(blocks=["t2"])
+    tiner.table(verbose=True)
