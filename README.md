@@ -4,8 +4,10 @@
     <p>
     <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
     <img src="https://img.shields.io/codecov/c/github/gusye1234/tiner">
+    <img src="https://img.shields.io/pypi/v/tiner.svg">
   </p>
 </div>
+
 
 ## Install
 
