@@ -24,9 +24,17 @@ from tiner import tiner
 from time import sleep
 
 with tiner("see this block"):
-  sleep(1)
+  slezep(1)
 # return the block running time
 print(tiner.get('see this block'))
+```
+
+or as a python decorator
+
+```python
+@tiner('see this function')
+def f():
+  #do something
 ```
 
 ### Global mining and grouping

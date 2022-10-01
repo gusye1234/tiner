@@ -36,6 +36,17 @@ def test_time_mining():
 
 
 @tiner_reset
+def test_decorator():
+    duration = 0.1
+
+    @tiner("func time")
+    def f():
+        sleep(duration)
+    f()
+    tiner.table(blocks=['func time'], verbose=True)
+
+
+@tiner_reset
 def test_zero():
     duration = 0.1
 

@@ -2,12 +2,13 @@ from collections import defaultdict
 from stat import filemode
 from typing import List
 import inspect
+from contextlib import ContextDecorator
 from functools import partial
 from unicodedata import name
 from .utils import getline, sanity_check
 
 
-class tiner:
+class tiner(ContextDecorator):
     """
     Time context manager for code block
         with tiner():
