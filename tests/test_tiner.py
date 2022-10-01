@@ -32,6 +32,7 @@ def test_time_mining():
             d = perf_counter() - s
         sum_d += d
     assert (tiner.get("test:loop") - sum_d) < 1e-3
+    tiner.table(verbose=True)
 
 
 @tiner_reset

@@ -29,6 +29,51 @@ with tiner("see this block"):
 print(tiner.get('see this block'))
 ```
 
+### Global mining and grouping
+
+the timing is managed by `tiner`, not its instances
+
+```python
+# A.py
+with tiner("In A"):
+  #do something
+...
+# B.py
+with tiner("In B"):
+  #do something
+
+tiner.table()
+#-------------------------
+╒═════════╤═══════════╕
+│ Block   │   Time(s) │
+╞═════════╪═══════════╡
+│ In B    │  ...      │
+├─────────┼───────────┤
+│ In A    │  ...      │
+╘═════════╧═══════════╛
+```
+
+`tiner` internally records the different locations for the same block name:
+
+```python
+for _ in range(loop_times):
+  with tiner("test:loop"):
+    sleep(duration)
+# do something
+with tiner("test:loop"):
+  sleep(duration)
+tiner.table(verbose=True)
+#-------------------------
+test:loop
+╒═══════════════╤════════╤═══════════╕
+│ File          │   Line │   Time(s) │
+╞═══════════════╪════════╪═══════════╡
+│ test_tiner.py │     29 │  0.516125 │
+├───────────────┼────────┼───────────┤
+│ test_tiner.py │     34 │  0.104061 │
+╘═══════════════╧════════╧═══════════╛
+```
+
 ### Design for loops
 
 ```python
@@ -43,32 +88,6 @@ for _ in range(10):
   
 # return the block running time over the loops
 print(tiner.get('see this loop'))
-```
-
-### Global mining
-
-the timing is managed by `tiner`, not its instances
-
-```python
-# A.py
-with tiner("In A"):
-  #do something
-...
-# B.py
-with tiner("In B"):
-  #do something
-
-tiner.table()
-```
-
-```
-╒═════════╤═══════════╕
-│ Block   │   Time(s) │
-╞═════════╪═══════════╡
-│ In B    │  ...      │
-├─────────┼───────────┤
-│ In A    │  ...      │
-╘═════════╧═══════════╛
 ```
 
 ### Easy to use
