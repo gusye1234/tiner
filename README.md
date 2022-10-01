@@ -2,12 +2,17 @@
   <h1>tiner</h1>
   <p><strong>Block-wise timer for Python</strong></p>
     <p>
-    <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
-    <img src="https://img.shields.io/codecov/c/github/gusye1234/tiner">
-    <img src="https://img.shields.io/pypi/v/tiner.svg">
+    <a href="https://github.com/gusye1234/tiner/actions?query=workflow%3Atest">
+      <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
+    </a>
+    <a href="https://codecov.io/gh/gusye1234/tiner">
+      <img src="https://img.shields.io/codecov/c/github/gusye1234/tiner">
+    </a>
+    <a href="https://pypi.org/project/tiner/">
+      <img src="https://img.shields.io/pypi/v/tiner.svg">
+    </a>
   </p>
 </div>
-
 
 ## Install
 
