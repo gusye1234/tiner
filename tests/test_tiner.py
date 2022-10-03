@@ -1,5 +1,6 @@
 import pytest
 from tiner import tiner
+import threading
 from functools import wraps
 from time import sleep, perf_counter
 
@@ -91,4 +92,23 @@ def test_table():
         sleep(duration)
 
     tiner.table()
+    tiner.table(verbose=True)
+
+
+@tiner_reset
+def test_threadings():
+    duration = 0.1
+    test_t = 5
+
+    def log_func():
+        with tiner("test:thread"):
+            sleep(duration)
+
+    threads = []
+    for _ in range(test_t):
+        x = threading.Thread(target=log_func,)
+        threads.append(x)
+        x.start()
+    for x in threads:
+        x.join()
     tiner.table(verbose=True)

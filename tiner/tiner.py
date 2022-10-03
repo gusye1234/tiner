@@ -1,10 +1,13 @@
 from collections import defaultdict
+from concurrent.futures import thread
 from stat import filemode
 from typing import List
 import inspect
+import threading
 from contextlib import ContextDecorator
 from functools import partial
 from unicodedata import name
+import threading
 from .utils import getline, sanity_check
 
 
@@ -20,6 +23,7 @@ class tiner(ContextDecorator):
     get_time = perf_counter
     fmt_table = partial(tabulate, headers='firstrow', tablefmt='fancy_grid')
     __NAMED_INFO = defaultdict(dict)  # global info record
+    __thread_lock = threading.Lock()
     __enable = True
 
     @staticmethod
@@ -35,9 +39,10 @@ class tiner(ContextDecorator):
             for key in blocks:
                 sanity_check(key, tiner.__NAMED_INFO)
                 print(key)
-                cols = [['File', 'Line', 'Time(s)']]
-                for pack, t in tiner.__NAMED_INFO[key].items():
-                    cols.append((pack[0], pack[1], t))
+                cols = [['File', 'Line', 'Thread', 'Time(s)']]
+                for pack in sorted(tiner.__NAMED_INFO[key].keys()):
+                    t = tiner.__NAMED_INFO[key][pack]
+                    cols.append((pack[0], pack[1], pack[2], t))
                 print(tiner.fmt_table(cols))
 
     @staticmethod
@@ -46,7 +51,8 @@ class tiner(ContextDecorator):
             blocks = list(tiner.__NAMED_INFO.keys())
         for key in blocks:
             sanity_check(key, tiner.__NAMED_INFO)
-            del tiner.__NAMED_INFO[key]
+            with tiner.__thread_lock:
+                del tiner.__NAMED_INFO[key]
 
     @staticmethod
     def get(name: str):
@@ -55,19 +61,23 @@ class tiner(ContextDecorator):
 
     @staticmethod
     def disable():
-        tiner.__enable = False
+        with tiner.__thread_lock:
+            tiner.__enable = False
 
     @staticmethod
     def enable():
-        tiner.__enable = True
+        with tiner.__thread_lock:
+            tiner.__enable = True
 
     def __init__(self, name: str, **kwargs):
         if tiner.__enable:
             frame = inspect.currentframe().f_back
             filename, lineno = getline(frame)
-            if (filename, lineno) not in tiner.__NAMED_INFO[name]:
-                tiner.__NAMED_INFO[name][(filename, lineno)] = 0
-            self.pack = (filename, lineno)
+            curr_thread = threading.current_thread().name
+            pack = (filename, lineno, curr_thread)
+            if pack not in tiner.__NAMED_INFO[name]:
+                tiner.__NAMED_INFO[name][pack] = 0
+            self.pack = pack
             self.named = name
 
     def __enter__(self):
@@ -78,4 +88,5 @@ class tiner(ContextDecorator):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if tiner.__enable:
             duration = tiner.get_time() - self.start
-            tiner.__NAMED_INFO[self.named][self.pack] += duration
+            with tiner.__thread_lock:
+                tiner.__NAMED_INFO[self.named][self.pack] += duration

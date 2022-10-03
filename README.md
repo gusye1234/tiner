@@ -66,7 +66,7 @@ tiner.table()
 ╘═════════╧═══════════╛
 ```
 
-`tiner` internally records the different locations for the same block name:
+`tiner` internally records the different locations and threads for the same block name:
 
 ```python
 for _ in range(loop_times):
@@ -78,13 +78,13 @@ with tiner("test:loop"):
 tiner.table(verbose=True)
 #-------------------------
 test:loop
-╒═══════════════╤════════╤═══════════╕
-│ File          │   Line │   Time(s) │
-╞═══════════════╪════════╪═══════════╡
-│ test_tiner.py │     29 │  0.516125 │
-├───────────────┼────────┼───────────┤
-│ test_tiner.py │     34 │  0.104061 │
-╘═══════════════╧════════╧═══════════╛
+╒═══════════════╤════════╤════════════╤═══════════╕
+│ File          │   Line │ Thread     │   Time(s) │
+╞═══════════════╪════════╪════════════╪═══════════╡
+│ test_tiner.py │    26  │ MainThread │  0.103926 │
+├───────────────┼────────┼────────────┼───────────┤
+│ test_tiner.py │    34  │ MainThread │  0.10409  │
+╘═══════════════╧════════╧════════════╧═══════════╛
 ```
 
 ### Design for loops
