@@ -44,7 +44,7 @@ def f():
 
 ### Global mining and grouping
 
-the timing is managed by `tiner`, not its instances
+the timing is managed by `tiner`, not its instances:
 
 ```python
 # A.py
@@ -66,7 +66,7 @@ tiner.table()
 ╘═════════╧═══════════╛
 ```
 
-`tiner` internally records the different locations and threads for the same block name:
+`tiner` internally records the different locations and threads for the same block name, display the additional infomation with `tiner.table(verbose=True)`:
 
 ```python
 for _ in range(loop_times):
@@ -75,6 +75,7 @@ for _ in range(loop_times):
 # do something
 with tiner("test:loop"):
   sleep(duration)
+  
 tiner.table(verbose=True)
 #-------------------------
 test:loop
