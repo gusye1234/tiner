@@ -33,8 +33,9 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
           pip install pytest-cov
-      - name: Test
+      - name: Build and Test
         run: |
+          python setup.py develop
           python -m pytest --cov=tiner --cov-report=xml -v ./tests
       - name: Check codecov file
         id: check_files
