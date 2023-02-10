@@ -1,6 +1,5 @@
+import os
 from collections import defaultdict
-from concurrent.futures import thread
-from stat import filemode
 from typing import List
 import inspect
 import threading
@@ -25,25 +24,34 @@ class tiner(ContextDecorator):
     __NAMED_INFO = defaultdict(dict)  # global info record
     __thread_lock = threading.Lock()
     __enable = True
+    print = print
 
     @staticmethod
-    def table(blocks: List = None, verbose=False):
+    def table(blocks: List = None, verbose=False, average=False):
         if blocks is None:
             blocks = list(tiner.__NAMED_INFO.keys())
         if not verbose:
-            data = [['Block', 'Time(s)']]
+            cols = [['Block', 'Time(s)', "Hits"]]
             for key in blocks:
-                data.append((key, tiner.get(key)))
-            print(tiner.fmt_table(data))
-        else:
-            for key in blocks:
-                sanity_check(key, tiner.__NAMED_INFO)
-                print(key)
-                cols = [['File', 'Line', 'Thread', 'Time(s)']]
-                for pack in sorted(tiner.__NAMED_INFO[key].keys()):
-                    t = tiner.__NAMED_INFO[key][pack]
-                    cols.append((pack[0], pack[1], pack[2], t))
-                print(tiner.fmt_table(cols))
+                cols.append((key, *tiner.get(key)))
+            if average:
+                cols = [(p[0], p[1] / (p[2] + 1e-14), p[2]) for p in cols[1:]]
+                cols.insert(0, ['Block', 'Aver. time(s)', "Hits"])
+            tiner.print(tiner.fmt_table(cols))
+            return
+        for key in blocks:
+            sanity_check(key, tiner.__NAMED_INFO)
+            tiner.print(key)
+            cols = [['File', 'Line', 'Time(s)', "Hits"]]
+            for pack in sorted(tiner.__NAMED_INFO[key].keys()):
+                t = tiner.__NAMED_INFO[key][pack]
+                cols.append((pack[0], pack[1], *t))
+            if average:
+                cols = [(*p[0:2], p[2] / (p[3] + 1e-14), p[3])
+                        for p in cols[1:]]
+                cols.insert(0, ['Block', 'Line', 'Thread',
+                            'Aver. time(s)', "Hits"])
+            tiner.print(tiner.fmt_table(cols))
 
     @staticmethod
     def zero(blocks: List = None):
@@ -57,7 +65,7 @@ class tiner(ContextDecorator):
     @staticmethod
     def get(name: str):
         sanity_check(name, tiner.__NAMED_INFO)
-        return sum(tiner.__NAMED_INFO[name].values())
+        return sum([p[0] for p in tiner.__NAMED_INFO[name].values()]), sum([p[1] for p in tiner.__NAMED_INFO[name].values()])
 
     @staticmethod
     def disable():
@@ -69,16 +77,18 @@ class tiner(ContextDecorator):
         with tiner.__thread_lock:
             tiner.__enable = True
 
-    def __init__(self, name: str, **kwargs):
-        if tiner.__enable:
-            frame = inspect.currentframe().f_back
-            filename, lineno = getline(frame)
-            curr_thread = threading.current_thread().name
-            pack = (filename, lineno, curr_thread)
-            if pack not in tiner.__NAMED_INFO[name]:
-                tiner.__NAMED_INFO[name][pack] = 0
-            self.pack = pack
-            self.named = name
+    def __init__(self, name: str, synchronize=lambda: None):
+        if not tiner.__enable:
+            return
+        frame = inspect.currentframe().f_back
+        filename, lineno = getline(frame)
+        pack = (filename, lineno)
+        if pack not in tiner.__NAMED_INFO[name]:
+            tiner.__NAMED_INFO[name][pack] = [0, 0]
+        self.pack = pack
+        self.named = name
+
+        self.synchronize = synchronize
 
     def __enter__(self):
         if tiner.__enable:
@@ -86,7 +96,10 @@ class tiner(ContextDecorator):
             return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if tiner.__enable:
-            duration = tiner.get_time() - self.start
-            with tiner.__thread_lock:
-                tiner.__NAMED_INFO[self.named][self.pack] += duration
+        if not tiner.__enable:
+            return 
+        self.synchronize()
+        duration = tiner.get_time() - self.start
+        with tiner.__thread_lock:
+            tiner.__NAMED_INFO[self.named][self.pack][0] += duration
+            tiner.__NAMED_INFO[self.named][self.pack][1] += 1

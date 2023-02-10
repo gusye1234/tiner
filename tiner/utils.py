@@ -1,3 +1,4 @@
+import os
 from types import FrameType
 from typing import Dict
 from difflib import get_close_matches
@@ -6,7 +7,7 @@ from difflib import get_close_matches
 def getline(frame: FrameType):
     lineno = frame.f_lineno
     filename = frame.f_code.co_filename
-
+    filename = os.path.relpath(filename)    
     return filename, lineno
 
 
