@@ -1,6 +1,6 @@
 <div align="center">
   <h1>tiner</h1>
-  <p><strong>Block-wise timer for Python</strong></p>
+  <p><strong>Block-wise, thread-safety timer for loops</strong></p>
     <p>
     <a href="https://github.com/gusye1234/tiner/actions?query=workflow%3Atest">
       <img src="https://github.com/gusye1234/tiner/actions/workflows/main.yml/badge.svg">
@@ -13,6 +13,7 @@
     </a>
   </p>
 </div>
+
 
 ## Install
 
@@ -48,44 +49,44 @@ the timing is managed by `tiner`, not its instances:
 
 ```python
 # A.py
-with tiner("In A"):
-  #do something
+for _ in range(20):
+  with tiner("t1"):
+    #do something
 ...
 # B.py
-with tiner("In B"):
-  #do something
-
+for _ in range(20):
+  with tiner("t2"):
+    #do something
+...
+# main.py
 tiner.table()
 #-------------------------
-╒═════════╤═══════════╕
-│ Block   │   Time(s) │
-╞═════════╪═══════════╡
-│ In B    │  ...      │
-├─────────┼───────────┤
-│ In A    │  ...      │
-╘═════════╧═══════════╛
+╒═════════╤═══════════╤════════╕
+│ Block   │   Time(s) │   Hits │
+╞═════════╪═══════════╪════════╡
+│ t1      │ 0.026127  │     20 │
+├─────────┼───────────┼────────┤
+│ t2      │ 0.0131467 │     10 │
+╘═════════╧═══════════╧════════╛
 ```
 
-`tiner` internally records the different locations and threads for the same block name, display the additional infomation with `tiner.table(verbose=True)`:
+`tiner` internally records the different locations for the same block name, display the additional infomation with `tiner.table(verbose=True)`:
 
 ```python
-for _ in range(loop_times):
+for _ in range(10):
   with tiner("test:loop"):
     sleep(duration)
-# do something
-with tiner("test:loop"):
-  sleep(duration)
   
 tiner.table(verbose=True)
 #-------------------------
 test:loop
-╒═══════════════╤════════╤════════════╤═══════════╕
-│ File          │   Line │ Thread     │   Time(s) │
-╞═══════════════╪════════╪════════════╪═══════════╡
-│ test_tiner.py │    26  │ MainThread │  0.103926 │
-├───────────────┼────────┼────────────┼───────────┤
-│ test_tiner.py │    34  │ MainThread │  0.10409  │
-╘═══════════════╧════════╧════════════╧═══════════╛
+╒═════════════════════╤════════╤═══════════╤════════╕
+│ File                │   Line │   Time(s) │   Hits │
+╞═════════════════════╪════════╪═══════════╪════════╡
+│ tests/test_tiner.py │    107 │ 0.0128279 │     10 │
+├─────────────────────┼────────┼───────────┼────────┤
+│ tests/test_tiner.py │    112 │ 0.0132992 │     10 │
+╘═════════════════════╧════════╧═══════════╧════════╛
 ```
 
 ### Design for loops
@@ -104,6 +105,20 @@ for _ in range(10):
 print(tiner.get('see this loop'))
 ```
 
+### Handle asynchronous programs
+
+```python
+import os
+from tiner import tiner
+
+# tiner will call the synchronize function when the block is over
+with tiner("loop", synchronize=torch.cuda.synchronize):
+  # machine learning running
+  
+# return the block running time over the loops
+print(tiner.get('loop'))
+```
+
 ### Easy to use
 
 A timer should be clear and simple
@@ -113,6 +128,7 @@ tiner.get(BLOCK_NAME) # return a certain block running time so far
 tiner.table([BLOCK1, ...]) # print some blocks' time on a formatted table
 tiner.zero([BLOCK1, ...]) # empty some blocks' time
 tiner.disable() # disable time logging
+tiner.enable() # enable time logging
 ```
 
 ---
