@@ -1,0 +1,2 @@
+- [ ] capture console output while multi-process or multi-threads want to use `tiner.table()`
+- [ ] add user pass the synchronize function, when `__exit__` to execute.
