@@ -70,10 +70,13 @@ tiner.table()
 ╘═════════╧═══════════╧════════╛
 ```
 
-`tiner` internally records the different locations for the same block name, display the additional infomation with `tiner.table(verbose=True)`:
+`tiner` internally records the different locations for the same block name and will merge their duration at report. Display the additional infomation with `tiner.table(verbose=True)`:
 
 ```python
 for _ in range(10):
+  with tiner("test:loop"):
+    sleep(duration)
+  ...
   with tiner("test:loop"):
     sleep(duration)
   
@@ -130,6 +133,3 @@ tiner.zero([BLOCK1, ...]) # empty some blocks' time
 tiner.disable() # disable time logging
 tiner.enable() # enable time logging
 ```
-
----
-> **NOTE**: `tiner`'s timing is relatively precise. You should only use it for comparison of the timings of different blocks in one run, not for different runs of your program.
